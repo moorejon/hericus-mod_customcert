@@ -56,6 +56,12 @@ define('CUSTOMCERT_DATE_COURSE_END', '-4');
  */
 define('CUSTOMCERT_DATE_CURRENT_DATE', '-5');
 
+/**
+ * Date - Course expiration
+ */
+define('CUSTOMCERT_DATE_COURSE_EXPIRATION', '-100');
+
+
 require_once($CFG->dirroot . '/lib/grade/constants.php');
 
 /**
@@ -66,6 +72,10 @@ require_once($CFG->dirroot . '/lib/grade/constants.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class element extends \mod_customcert\element {
+    /**
+     * @var bool $recompletionenabled
+     */
+    protected $recompletionenabled = null;
 
     /**
      * This function renders the form elements when adding a customcert element.
@@ -86,7 +96,10 @@ class element extends \mod_customcert\element {
         $dateoptions[CUSTOMCERT_DATE_COURSE_START] = get_string('coursestartdate', 'customcertelement_date');
         $dateoptions[CUSTOMCERT_DATE_COURSE_END] = get_string('courseenddate', 'customcertelement_date');
         $dateoptions[CUSTOMCERT_DATE_COURSE_GRADE] = get_string('coursegradedate', 'customcertelement_date');
-        $dateoptions = $dateoptions + \mod_customcert\element_helper::get_grade_items($COURSE);
+        $dateoptions[CUSTOMCERT_DATE_COURSE_EXPIRATION] = get_string('courseexpiration', 'customcertelement_date');
+        if ($this->is_recompletion_enabled()) {
+            $dateoptions = $dateoptions + \mod_customcert\element_helper::get_grade_items($COURSE);
+        }
 
         $mform->addElement('select', 'dateitem', get_string('dateitem', 'customcertelement_date'), $dateoptions);
         $mform->addHelpButton('dateitem', 'dateitem', 'customcertelement_date');
@@ -162,6 +175,33 @@ class element extends \mod_customcert\element {
                 if ($timecompleted = $DB->get_record_sql($sql, array('userid' => $issue->userid, 'courseid' => $courseid))) {
                     if (!empty($timecompleted->timecompleted)) {
                         $date = $timecompleted->timecompleted;
+                    }
+                }
+            } else if ($dateitem == CUSTOMCERT_DATE_COURSE_EXPIRATION) {
+                if ($this->is_recompletion_enabled()) {
+                    // Get the last completion date.
+                    $sql = "SELECT MAX(c.timecompleted) as timecompleted
+                              FROM {course_completions} c
+                             WHERE c.userid = :userid
+                               AND c.course = :courseid";
+                    if ($timecompleted = $DB->get_record_sql($sql, array('userid' => $issue->userid, 'courseid' => $courseid))) {
+                        if (!empty($timecompleted->timecompleted)) {
+                            $date = $timecompleted->timecompleted;
+                        }
+                        // Recompletion duration.
+                        $sql = "SELECT rc.* 
+                                  FROM {local_recompletion_config} rc
+                                  JOIN {local_recompletion_config} rc2 
+                                    ON rc.course = rc2.course 
+                                   AND rc2.name = 'enable' 
+                                   AND rc2.value = 1
+                                 WHERE rc.course = ? 
+                                   AND rc.name = 'recompletionduration'";
+                        if ($rec = $DB->get_record_sql($sql, array($courseid))) {
+                            if (!empty($date)) {
+                                $date += (int)$rec->value;
+                            }
+                        }
                     }
                 }
             } else if ($dateitem == CUSTOMCERT_DATE_COURSE_START) {
@@ -377,5 +417,19 @@ class element extends \mod_customcert\element {
             }
         }
         return 'th';
+    }
+
+    public function is_recompletion_enabled() {
+        global $DB;
+
+        if (is_null($this->recompletionenabled)) {
+            if ($plugininfo = \core_plugin_manager::instance()->get_plugin_info('local_recompletion')) {
+                $this->recompletionenabled = true;
+            } else {
+                $this->recompletionenabled = false;
+            }
+        }
+
+        return $this->recompletionenabled;
     }
 }
