@@ -185,7 +185,7 @@ class element extends \mod_customcert\element {
                                   JOIN {local_recompletion_config} rc2 
                                     ON rc.course = rc2.course 
                                    AND rc2.name = 'enable' 
-                                   AND rc2.value = 1
+                                   AND rc2.value = '1'
                                  WHERE rc.course = ? 
                                    AND rc.name = 'recompletionduration'";
                         if ($rec = $DB->get_record_sql($sql, array($courseid))) {
