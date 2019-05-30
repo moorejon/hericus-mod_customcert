@@ -105,18 +105,33 @@ class element extends \mod_customcert\element {
      * @return array the list of teachers
      */
     protected function get_list_of_teachers() {
-        global $PAGE;
+        global $PAGE, $CFG, $DB;
 
         // Return early if we are in a site template.
         if ($PAGE->context->id == \context_system::instance()->id) {
             return [];
         }
 
+        if (empty($CFG->coursecontact)) {
+            return [];
+        }
+
         // The list of teachers to return.
         $teachers = array();
 
-        // Now return all users who can manage the customcert in this context.
-        if ($users = get_enrolled_users($PAGE->context, 'mod/customcert:manage')) {
+        $courseid = \mod_customcert\element_helper::get_courseid($this->id);
+
+        $sql = "SELECT u.*
+                  FROM {role_assignments} ra 
+                  JOIN {context} cx
+                    ON ra.contextid = cx.id
+                  JOIN {user} u 
+                    ON ra.userid = u.id
+                 WHERE cx.contextlevel = ?
+                  AND cx.instanceid = ?
+                  AND ra.roleid IN ($CFG->coursecontact)";
+
+        if ($users = $DB->get_records_sql($sql, array(CONTEXT_COURSE, $courseid))) {
             foreach ($users as $user) {
                 $teachers[$user->id] = fullname($user);
             }
