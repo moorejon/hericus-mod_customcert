@@ -179,28 +179,20 @@ class element extends \mod_customcert\element {
                 }
             } else if ($dateitem == CUSTOMCERT_DATE_COURSE_EXPIRATION) {
                 if ($this->is_recompletion_enabled()) {
-                    // Get the last completion date.
-                    $sql = "SELECT MAX(c.timecompleted) as timecompleted
-                              FROM {course_completions} c
-                             WHERE c.userid = :userid
-                               AND c.course = :courseid";
-                    if ($timecompleted = $DB->get_record_sql($sql, array('userid' => $issue->userid, 'courseid' => $courseid))) {
-                        if (!empty($timecompleted->timecompleted)) {
-                            $date = $timecompleted->timecompleted;
-                        }
-                        // Recompletion duration.
-                        $sql = "SELECT rc.* 
-                                  FROM {local_recompletion_config} rc
-                                  JOIN {local_recompletion_config} rc2 
-                                    ON rc.course = rc2.course 
-                                   AND rc2.name = 'enable' 
-                                   AND rc2.value = '1'
-                                 WHERE rc.course = ? 
-                                   AND rc.name = 'recompletionduration'";
-                        if ($rec = $DB->get_record_sql($sql, array($courseid))) {
-                            if (!empty($date)) {
-                                $date += (int)$rec->value;
-                            }
+                    // Get original issue date
+                    $date = $issue->timecreated;
+                    // Recompletion duration.
+                    $sql = "SELECT rc.* 
+                              FROM {local_recompletion_config} rc
+                              JOIN {local_recompletion_config} rc2 
+                                ON rc.course = rc2.course 
+                               AND rc2.name = 'enable' 
+                               AND rc2.value = '1'
+                             WHERE rc.course = ? 
+                               AND rc.name = 'recompletionduration'";
+                    if ($rec = $DB->get_record_sql($sql, array($courseid))) {
+                        if (!empty($date)) {
+                            $date += (int)$rec->value;
                         }
                     }
                 }
