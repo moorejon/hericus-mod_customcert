@@ -169,9 +169,8 @@ class element extends \mod_customcert\element {
                     }
                 }
             } else if ($dateitem == CUSTOMCERT_DATE_COURSE_EXPIRATION) {
+                $date = '';
                 if ($this->is_recompletion_enabled()) {
-                    // Get original issue date
-                    $date = $issue->timecreated;
                     // Recompletion duration.
                     $sql = "SELECT rc.* 
                               FROM {local_recompletion_config} rc
@@ -182,6 +181,7 @@ class element extends \mod_customcert\element {
                              WHERE rc.course = ? 
                                AND rc.name = 'recompletionduration'";
                     if ($rec = $DB->get_record_sql($sql, array($courseid))) {
+                        $date = $issue->timecreated;
                         if (!empty($date)) {
                             $date += (int)$rec->value;
                         }
