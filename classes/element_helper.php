@@ -56,6 +56,11 @@ class element_helper {
      */
     const CUSTOMCERT_REF_POINT_TOPRIGHT = 2;
 
+    const CUSTOMCERT_TEXT_ALIGN_DEFAULT = '';
+    const CUSTOMCERT_TEXT_ALIGN_LEFT = 'L';
+    const CUSTOMCERT_TEXT_ALIGN_CENTER = 'C';
+    const CUSTOMCERT_TEXT_ALIGN_RIGHT = 'R';
+
     /**
      * Common behaviour for rendering specified content on the pdf.
      *
@@ -73,6 +78,7 @@ class element_helper {
         $y = $element->get_posy();
         $w = $element->get_width();
         $refpoint = $element->get_refpoint();
+        $textalign = $element->get_textalign();
         $actualwidth = $pdf->GetStringWidth($content);
 
         if ($w and $w < $actualwidth) {
@@ -104,7 +110,7 @@ class element_helper {
             $w += 0.0001;
         }
         $pdf->setCellPaddings(0, 0, 0, 0);
-        $pdf->writeHTMLCell($w, 0, $x, $y, $content, 0, 0, false, true);
+        $pdf->writeHTMLCell($w, 0, $x, $y, $content, 0, 0, false, true, $textalign);
     }
 
     /**
@@ -203,6 +209,24 @@ class element_helper {
         $mform->setType('refpoint', PARAM_INT);
         $mform->setDefault('refpoint', self::CUSTOMCERT_REF_POINT_TOPCENTER);
         $mform->addHelpButton('refpoint', 'refpoint', 'customcert');
+    }
+
+    /**
+     * Helper function to render the textalign element.
+     *
+     * @param \MoodleQuickForm $mform the edit_form instance.
+     */
+    public static function render_form_element_textalign($mform) {
+        $textalignoptions = array();
+        $textalignoptions[self::CUSTOMCERT_TEXT_ALIGN_DEFAULT] = get_string('default', 'customcert');
+        $textalignoptions[self::CUSTOMCERT_TEXT_ALIGN_CENTER] = get_string('center', 'customcert');
+        $textalignoptions[self::CUSTOMCERT_TEXT_ALIGN_LEFT] = get_string('left', 'customcert');
+        $textalignoptions[self::CUSTOMCERT_TEXT_ALIGN_RIGHT] = get_string('right', 'customcert');
+
+        $mform->addElement('select', 'textalign', get_string('textalign', 'customcert'), $textalignoptions);
+        $mform->setType('textalign', PARAM_TEXT);
+        $mform->setDefault('retextalignfpoint', self::CUSTOMCERT_REF_POINT_TOPCENTER);
+        $mform->addHelpButton('textalign', 'textalign', 'customcert');
     }
 
     /**
