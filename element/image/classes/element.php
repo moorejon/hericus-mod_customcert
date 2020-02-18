@@ -342,6 +342,11 @@ class element extends \mod_customcert\element {
         // Get the current data we have stored for this element.
         $elementinfo = json_decode($this->get_data());
 
+        // Skip it if system context.
+        if ($elementinfo->contextid == \context_system::instance()->id) {
+            return;
+        }
+	
         // Update the context.
         $elementinfo->contextid = \context_course::instance($restore->get_courseid())->id;
 
