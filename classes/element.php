@@ -98,6 +98,11 @@ abstract class element {
     protected $refpoint;
 
     /**
+     * @var string The Text align.
+     */
+    protected $textalign;
+
+    /**
      * @var bool $showposxy Show position XY form elements?
      */
     protected $showposxy;
@@ -129,6 +134,7 @@ abstract class element {
         $this->posy = $element->posy;
         $this->width = $element->width;
         $this->refpoint = $element->refpoint;
+        $this->textalign = $element->textalign;
         $this->showposxy = isset($showposxy) && $showposxy;
     }
 
@@ -232,6 +238,15 @@ abstract class element {
     }
 
     /**
+     * Returns the textalign.
+     *
+     * @return string
+     */
+    public function get_textalign() {
+        return $this->textalign;
+    }
+
+    /**
      * This function renders the form elements when adding a customcert element.
      * Can be overridden if more functionality is needed.
      *
@@ -246,6 +261,7 @@ abstract class element {
         }
         element_helper::render_form_element_width($mform);
         element_helper::render_form_element_refpoint($mform);
+        element_helper::render_form_element_textalign($mform);
     }
 
     /**
@@ -265,7 +281,8 @@ abstract class element {
             'posx' => $this->posx,
             'posy' => $this->posy,
             'width' => $this->width,
-            'refpoint' => $this->refpoint
+            'refpoint' => $this->refpoint,
+            'textalign' => $this->textalign
         ];
         foreach ($properties as $property => $value) {
             if (!is_null($value) && $mform->elementExists($property)) {
@@ -320,6 +337,7 @@ abstract class element {
         }
         $element->width = (isset($data->width)) ? $data->width : null;
         $element->refpoint = (isset($data->refpoint)) ? $data->refpoint : null;
+        $element->textalign = (isset($data->textalign)) ? $data->textalign : '';
         $element->timemodified = time();
 
         // Check if we are updating, or inserting a new element.

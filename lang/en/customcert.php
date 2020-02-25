@@ -195,3 +195,10 @@ $string['verifycertificateanyone'] = 'Allow anyone to verify a certificate';
 $string['verifycertificateanyone_help'] = 'This setting enables anyone with the certificate verification link (including users not logged in) to verify a certificate.';
 $string['width'] = 'Width';
 $string['width_help'] = 'This is the width of the certificate PDF in mm. For reference an A4 piece of paper is 210mm wide and a letter is 216mm wide.';
+
+$string['textalign'] = 'Text align';
+$string['textalign_help'] = '';
+$string['default'] = 'Default';
+$string['center'] = 'Center';
+$string['left'] = 'Left';
+$string['right'] = 'Right';
