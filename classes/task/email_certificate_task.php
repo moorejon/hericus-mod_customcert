@@ -106,6 +106,11 @@ class email_certificate_task extends \core\task\scheduled_task {
                     continue;
                 }
 
+                // Exclude teachers/admins/managers.
+                if (has_capability('moodle/course:update', $context, $enroluser->id)) {
+                    continue;
+                }
+
                 // Now check if the certificate is not visible to the current user.
                 $cm = get_fast_modinfo($customcert->courseid, $enroluser->id)->instances['customcert'][$customcert->id];
                 if (!$cm->uservisible) {
